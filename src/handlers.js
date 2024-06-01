@@ -8,7 +8,6 @@ const signUpHandler = async (request, h) => {
 const loginHandler = async (request, h) => {
     const { email, password } = request.payload;
 
-    // 
     // Cek kalau user sama password yg dikirim kosong
     if (!email || !password) {
         return h.response({
