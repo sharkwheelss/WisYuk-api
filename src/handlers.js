@@ -69,8 +69,8 @@ const signUpHandler = async (request, h) => {
         fs.unlinkSync(filePath);
 
         return h.response({
-            status:'success',
-            message:'sign up success'
+            status: 'success',
+            message: 'sign up success'
         }).code(201);
 
     } catch (err) {
@@ -133,7 +133,54 @@ const loginHandler = async (request, h) => {
     }
 };
 
+// VIEW PROFIL
+const viewProfilHandler = async (request, h) => {
+    // id diambil dari route url
+    const { userID } = request.params;
+
+    try {
+        // Query to get user email
+        const [userRows] = await pool.query('SELECT email FROM users where id=?', [userID]);
+
+        // cek apakah email ada
+        if (userRows.length === 0) {
+            return h.response({
+                status: 'fail',
+                message: 'email not found'
+            }).code(404);
+        }
+        // email ditemukan
+        const userEmail = userRows[0].email;
+
+        // Query to get user preferences
+        const [userPref] = await pool.query('SELECT p.name as preference_name FROM users u INNER JOIN users_preferences up on u.id = up.users_id INNER JOIN preferences p on p.id = up.preferences_id WHERE u.id = ?;', [userID]);
+        if (userPref.length === 0) {
+            return h.response({
+                status: 'fail',
+                message: 'email not found'
+            }).code(404);
+        }
+        const preferences = userPref.map(row => row.preference_name);
+
+        return h.response({
+            status: 'success',
+            data: {
+                email: userEmail,
+                preferences: preferences
+            }
+        }).code(200);
+
+    } catch (err) {
+        console.error(err);
+        return h.response({
+            status: 'fail',
+            message: 'Internal server error'
+        }).code(500);
+    }
+}
+
 module.exports = {
     signUpHandler,
     loginHandler,
+    viewProfilHandler,
 };

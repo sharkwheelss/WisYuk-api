@@ -1,4 +1,4 @@
-const {signUpHandler, loginHandler} = require('./handlers');
+const {signUpHandler, loginHandler, viewProfilHandler} = require('./handlers');
 const multer = require('multer');
 const upload = multer({dest: 'uploads/'});
 
@@ -21,6 +21,11 @@ const routes = [
         method: 'POST',
         path: '/login',
         handler: loginHandler
+    },
+    {
+        method: 'GET',
+        path: '/profile/{userId}',
+        handler: viewProfilHandler
     },
 ];
 
