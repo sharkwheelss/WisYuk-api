@@ -1,10 +1,12 @@
 const pool = require('./db');
 const bcrypt = require('bcrypt');
 
+// SIGN UP
 const signUpHandler = async (request, h) => {
 
 };
 
+// LOGIN
 const loginHandler = async (request, h) => {
     const { email, password } = request.payload;
 
