@@ -4,6 +4,7 @@ const { uploadFile } = require('./cloudStorage');
 const fs = require('fs');
 const path = require('path');
 const { rejects } = require('assert');
+const { request } = require('http');
 const saltPass = 10;
 
 // SIGN UP
@@ -179,8 +180,54 @@ const viewProfilHandler = async (request, h) => {
     }
 }
 
+const editProfilHandler = async (request, h) => {
+    const { userID } = request.params;
+    const { name, password } = request.payload;
+    const file = request.payload.image;
+
+    // query for current data
+    const [userRows] = await pool.query('SELECT name, password, updated_at FROM users WHERE id = ?', [userId]);
+    if (userRows.length === 0) {
+        return h.response({
+            status: 'fail',
+            message: 'email not found'
+        }).code(404);
+    }
+
+    const userCurData = userRows[0];
+
+    // Hash the new password
+    let hashedPass = user.password;
+    if (password) {
+        hashedPass = await bcrypt.hash(password, 10);
+    }
+
+    // new image profil
+    let imageUrl = user.image;
+    if (file) {
+        const imagePath = file.hapi.filename;
+        imageUrl = await uploadFile(file.path, imagePath);
+    }
+
+    const updatedAt = new Date();
+
+    // store old data into update_profile
+    await pool.query('INSERT INTO update_profil (user_id, old_name, old_password, old_updated_at) VALUES (?, ?, ?, ?)',
+        [userID, user.name, user.password, user.updated_at]);
+
+    // update table users
+    await pool.query('UPDATE users SET name = ?, password = ?, updated_at = ?, image = ? WHERE id = ?',
+        [name, hashedPass, updatedAt, imageUrl, userID]);
+
+    return h.response({
+        status: 'success',
+        message: 'Profile updated successfully',
+    }).code(200);
+}
+
 module.exports = {
     signUpHandler,
     loginHandler,
     viewProfilHandler,
+    editProfilHandler,
 };

@@ -1,12 +1,13 @@
-const {signUpHandler, loginHandler, viewProfilHandler} = require('./handlers');
+const { config } = require('dotenv');
+const { signUpHandler, loginHandler, viewProfilHandler, editProfilHandler } = require('./handlers');
 const multer = require('multer');
-const upload = multer({dest: 'uploads/'});
+const upload = multer({ dest: 'uploads/' });
 
 const routes = [
     {
         method: 'POST',
         path: '/signup',
-        config:{
+        config: {
             payload: {
                 output: 'stream',
                 parse: true,
@@ -26,6 +27,20 @@ const routes = [
         method: 'GET',
         path: '/profile/{userId}',
         handler: viewProfilHandler
+    },
+    {
+        method: 'PUT',
+        path: '/profile/{userId}',
+        config: {
+            payload: {
+                output: 'stream',
+                parse: true,
+                multipart: true,
+                allow: 'multipart/form-data',
+                maxBytes: 1000000
+            },
+            handler: signUpHandler
+        }
     },
 ];
 
