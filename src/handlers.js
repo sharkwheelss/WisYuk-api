@@ -1,10 +1,88 @@
 const pool = require('./db');
 const bcrypt = require('bcrypt');
+const { uploadFile } = require('./cloudStorage');
+const fs = require('fs');
+const path = require('path');
+const { rejects } = require('assert');
+const saltPass = 10;
 
+// SIGN UP
 const signUpHandler = async (request, h) => {
+    const { name, email, password, promotion } = request.payload;
+    // karena kolom image di cloud sql diisi dari url per item cloud storage
+    const file = request.payload.image;
 
+    if (!name || !email || !password || !promotion === undefined || !file) {
+        return h.response({
+            status: 'fail',
+            message: 'all fields are required'
+        }).code(400);
+    }
+
+    try {
+        // cek dlu apakah sudah pernah daftar pakai email yg sama
+        const [existingEmail] = await pool.query('SELECT * FROM users WHERE email=?', [email]);
+        if (existingEmail.length > 0) {
+            return h.response({
+                status: 'fail',
+                message: 'email already exists'
+            }).code(409);
+        }
+
+        // Hash the password
+        const hashedPass = await bcrypt.hash(password, saltPass);
+
+        // save the file locally before uploading
+        const filePath = path.join(__dirname, 'uploads', file.hapi.filename);
+        const fileStream = fs.createWriteStream(filePath);
+
+        file.pipe(fileStream);
+
+        const imageUploadPromise = new Promise((resolve, reject) => {
+            file.on('end', async () => {
+                try {
+                    const imageUrl = await uploadFile(filePath, `images/${file.hapi.filename}`);
+                    resolve(imageUrl);
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        });
+
+        const imageUrl = await imageUploadPromise;
+
+        // isi current timestamp
+        const timestamp = new Date();
+
+        // Insert Query
+        await pool.query('INSERT INTO users (name, email, password, bool_promotion, created_at, updated_at, image) VALUES (?,?,?,?,?,?,?);', [
+            name,
+            email,
+            hashedPass,
+            promotion,
+            timestamp,
+            timestamp,
+            imageUrl
+        ]);
+
+        // Clean up the local file
+        fs.unlinkSync(filePath);
+
+        return h.response({
+            status:'success',
+            message:'sign up success'
+        }).code(201);
+
+    } catch (err) {
+        console.error(err);
+        return h.response({
+            status: 'fail',
+            message: 'internal server error'
+        }).code(500);
+    }
 };
 
+// LOGIN
 const loginHandler = async (request, h) => {
     const { email, password } = request.payload;
 
