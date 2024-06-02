@@ -223,11 +223,387 @@ const editProfilHandler = async (request, h) => {
         status: 'success',
         message: 'Profile updated successfully',
     }).code(200);
-}
+};
+
+// User Preferences Handlers
+const addUserPreferencesHandler = (request, h) => {
+    const { users_id, preferences_id } = request.payload;
+    const updated_at = new Date().toISOString();
+    
+    const id = nanoid(16);
+    const newUserPreference = {
+      id,
+      users_id,
+      preferences_id,
+      updated_at,
+    };
+    userPreferences.push(newUserPreference);
+  
+    const isSuccess = userPreferences.filter((pref) => pref.id === id).length > 0;
+    if (isSuccess) {
+      return h
+        .response({
+          status: "success",
+          message: "User preference berhasil ditambahkan",
+          data: {
+            userPreferenceId: id,
+          },
+        })
+        .code(201);
+    } else {
+      return h
+        .response({
+          status: "fail",
+          message: "User preference gagal ditambahkan",
+        })
+        .code(500);
+    }
+  };
+  
+  const getAllUserPreferencesHandler = (request, h) => {
+    return h
+      .response({
+        status: "success",
+        data: {
+          userPreferences,
+        },
+      })
+      .code(200);
+  };
+  
+  const getUserPreferencesByIdHandler = (request, h) => {
+    const { userPreferenceId } = request.params;
+    const userPreference = userPreferences.find(pref => pref.id === userPreferenceId);
+    if (userPreference) {
+      return h
+        .response({
+          status: "success",
+          data: {
+            userPreference,
+          },
+        })
+        .code(200);
+    } else {
+      return h
+        .response({
+          status: "fail",
+          message: "User preference tidak ditemukan",
+        })
+        .code(404);
+    }
+  };
+  
+  const editUserPreferencesByIdHandler = (request, h) => {
+    const { userPreferenceId } = request.params;
+    const { users_id, preferences_id } = request.payload;
+    const updated_at = new Date().toISOString();
+  
+    const index = userPreferences.findIndex(pref => pref.id === userPreferenceId);
+    if (index !== -1) {
+      userPreferences[index] = {
+        ...userPreferences[index],
+        users_id,
+        preferences_id,
+        updated_at,
+      };
+      return h
+        .response({
+          status: "success",
+          message: "User preference berhasil diperbarui",
+        })
+        .code(200);
+    } else {
+      return h
+        .response({
+          status: "fail",
+          message: "User preference tidak ditemukan",
+        })
+        .code(404);
+    }
+  };
+  
+  const deleteUserPreferencesByIdHandler = (request, h) => {
+    const { userPreferenceId } = request.params;
+    const index = userPreferences.findIndex(pref => pref.id === userPreferenceId);
+    if (index !== -1) {
+      userPreferences.splice(index, 1);
+      return h
+        .response({
+          status: "success",
+          message: "User preference berhasil dihapus",
+        })
+        .code(200);
+    } else {
+      return h
+        .response({
+          status: "fail",
+          message: "User preference tidak ditemukan",
+        })
+        .code(404);
+    }
+  };
+
+// Home Page Handlers
+const addHomePageHandler = (request, h) => {
+    const { title, content } = request.payload;
+    const updated_at = new Date().toISOString();
+    
+    const id = nanoid(16);
+    const newHomePage = {
+      id,
+      title,
+      content,
+      updated_at,
+    };
+    homePages.push(newHomePage);
+  
+    const isSuccess = homePages.filter((page) => page.id === id).length > 0;
+    if (isSuccess) {
+      return h
+        .response({
+          status: "success",
+          message: "Halaman berhasil ditambahkan",
+          data: {
+            homePageId: id,
+          },
+        })
+        .code(201);
+    } else {
+      return h
+        .response({
+          status: "fail",
+          message: "Halaman gagal ditambahkan",
+        })
+        .code(500);
+    }
+  };
+  
+  const getAllHomePageHandler = (request, h) => {
+    return h
+      .response({
+        status: "success",
+        data: {
+          homePages,
+        },
+      })
+      .code(200);
+  };
+  
+  const getHomePageByIdHandler = (request, h) => {
+    const { homePageId } = request.params;
+    const homePage = homePages.find(page => page.id === homePageId);
+    if (homePage) {
+      return h
+        .response({
+          status: "success",
+          data: {
+            homePage,
+          },
+        })
+        .code(200);
+    } else {
+      return h
+        .response({
+          status: "fail",
+          message: "Halaman tidak ditemukan",
+        })
+        .code(404);
+    }
+  };
+  
+  const editHomePageByIdHandler = (request, h) => {
+    const { homePageId } = request.params;
+    const { title, content } = request.payload;
+    const updated_at = new Date().toISOString();
+  
+    const index = homePages.findIndex(page => page.id === homePageId);
+    if (index !== -1) {
+      homePages[index] = {
+        ...homePages[index],
+        title,
+        content,
+        updated_at,
+      };
+      return h
+        .response({
+          status: "success",
+          message: "Halaman berhasil diperbarui",
+        })
+        .code(200);
+    } else {
+      return h
+        .response({
+          status: "fail",
+          message: "Halaman tidak ditemukan",
+        })
+        .code(404);
+    }
+  };
+  
+  const deleteHomePageByIdHandler = (request, h) => {
+    const { homePageId } = request.params;
+    const index = homePages.findIndex(page => page.id === homePageId);
+    if (index !== -1) {
+      homePages.splice(index, 1);
+      return h
+        .response({
+          status: "success",
+          message: "Halaman berhasil dihapus",
+        })
+        .code(200);
+    } else {
+      return h
+        .response({
+          status: "fail",
+          message: "Halaman tidak ditemukan",
+        })
+        .code(404);
+    }
+  };
+  
+  // Payment Method Handlers
+  const addPaymentMethodHandler = (request, h) => {
+    const { name, type } = request.payload;
+    const updated_at = new Date().toISOString();
+    
+    const id = nanoid(16);
+    const newPaymentMethod = {
+      id,
+      name,
+      type,
+      updated_at,
+    };
+    paymentMethods.push(newPaymentMethod);
+  
+    const isSuccess = paymentMethods.filter((method) => method.id === id).length > 0;
+    if (isSuccess) {
+      return h
+        .response({
+          status: "success",
+          message: "Metode pembayaran berhasil ditambahkan",
+          data: {
+            paymentMethodId: id,
+          },
+        })
+        .code(201);
+    } else {
+      return h
+        .response({
+          status: "fail",
+          message: "Metode pembayaran gagal ditambahkan",
+        })
+        .code(500);
+    }
+  };
+  
+  const getAllPaymentMethodHandler = (request, h) => {
+    return h
+      .response({
+        status: "success",
+        data: {
+          paymentMethods,
+        },
+      })
+      .code(200);
+  };
+  
+  const getPaymentMethodByIdHandler = (request, h) => {
+    const { paymentMethodId } = request.params;
+    const paymentMethod = paymentMethods.find(method => method.id === paymentMethodId);
+    if (paymentMethod) {
+      return h
+        .response({
+          status: "success",
+          data: {
+            paymentMethod,
+          },
+        })
+        .code(200);
+    } else {
+      return h
+        .response({
+          status: "fail",
+          message: "Metode pembayaran tidak ditemukan",
+        })
+        .code(404);
+    }
+  };
+  
+  const editPaymentMethodByIdHandler = (request, h) => {
+    const { paymentMethodId } = request.params;
+    const { name, type } = request.payload;
+    const updated_at = new Date().toISOString();
+  
+    const index = paymentMethods.findIndex(method => method.id === paymentMethodId);
+    if (index !== -1) {
+      paymentMethods[index] = {
+        ...paymentMethods[index],
+        name,
+        type,
+        updated_at,
+      };
+      return h
+        .response({
+          status: "success",
+          message: "Metode pembayaran berhasil diperbarui",
+        })
+        .code(200);
+    } else {
+      return h
+        .response({
+          status: "fail",
+          message: "Metode pembayaran tidak ditemukan",
+        })
+        .code(404);
+    }
+  };
+  
+  const deletePaymentMethodByIdHandler = (request, h) => {
+    const { paymentMethodId } = request.params;
+    const index = paymentMethods.findIndex(method => method.id === paymentMethodId);
+    if (index !== -1) {
+      paymentMethods.splice(index, 1);
+      return h
+        .response({
+          status: "success",
+          message: "Metode pembayaran berhasil dihapus",
+        })
+        .code(200);
+    } else {
+      return h
+        .response({
+          status: "fail",
+          message: "Metode pembayaran tidak ditemukan",
+        })
+        .code(404);
+    }
+  };
 
 module.exports = {
     signUpHandler,
     loginHandler,
     viewProfilHandler,
     editProfilHandler,
+    addUserPreferencesHandler,
+
+ // Export User Preferences Handlers
+  getAllUserPreferencesHandler,
+  getUserPreferencesByIdHandler,
+  editUserPreferencesByIdHandler,
+  deleteUserPreferencesByIdHandler,
+
+  // Export Home Page Handlers
+  addHomePageHandler,
+  getAllHomePageHandler,
+  getHomePageByIdHandler,
+  editHomePageByIdHandler,
+  deleteHomePageByIdHandler,
+  
+  // Export Payment Method Handlers
+  addPaymentMethodHandler,
+  getAllPaymentMethodHandler,
+  getPaymentMethodByIdHandler,
+  editPaymentMethodByIdHandler,
+  deletePaymentMethodByIdHandler,
+
 };
